@@ -19,7 +19,7 @@ public class App
                     break;
                 }
 
-                comandos(c);
+                Comandos(c);
             } catch (IOException e) {
                 System.out.println("Error al salir del programa.");
             }
@@ -32,8 +32,8 @@ public class App
         }
     }
 
-    private static void comandos(String c) {
-        // Expresiones regulares para cada comando SQL
+    private static void Comandos(String c) {
+        // Expresiones regulares para cada comando
         Pattern usePattern = Pattern.compile("^USE\\s+(.+)$", Pattern.CASE_INSENSITIVE);
         Pattern createTablePattern = Pattern.compile("^CREATE\\s+TABLE\\s+(\\w+)\\s*\\((.*)\\);$", Pattern.CASE_INSENSITIVE);
         Pattern showTablesPattern = Pattern.compile("^SHOW\\s+TABLES$", Pattern.CASE_INSENSITIVE);
@@ -45,44 +45,44 @@ public class App
         Matcher matcher;
 
         if ((matcher = usePattern.matcher(c)).matches()) {
-            // Procesar comando USE
+            // Comando USE
             String path = matcher.group(1);
-            setPath(path);
+            Path(path);
             System.out.println("Ruta de trabajo establecida en: " + Path);
         } else if ((matcher = createTablePattern.matcher(c)).matches()) {
-            // Procesar comando CREATE TABLE
+            // Comando CREATE TABLE
             String tableName = matcher.group(1);
             String columns = matcher.group(2);
             createTable(tableName, columns);
             System.out.println("Tabla " + tableName + " creada exitosamente.");
         } else if ((showTablesPattern.matcher(c)).matches()) {
-            // Procesar comando SHOW TABLES
+            // Comando SHOW TABLES
             showTables();
         } else if ((matcher = dropTablePattern.matcher(c)).matches()) {
-            // Procesar comando DROP TABLE
+            // Comando DROP TABLE
             String tableName = matcher.group(1);
-            dropTable(tableName);
+            Drop(tableName);
             System.out.println("Tabla " + tableName + " eliminada exitosamente.");
         } else if ((matcher = selectPattern.matcher(c)).matches()) {
-            // Procesar comando SELECT
+            // Comando SELECT
             String columnName = matcher.group(1);
             String tableName = matcher.group(2);
-            selectColumnFromTable(columnName, tableName);
+            Select(columnName, tableName);
         } else if ((matcher = insertPattern.matcher(c)).matches()) {
-            // Procesar comando INSERT INTO
-            insertTable(matcher);
+            // Comando INSERT INTO
+            Insert(matcher);
         } else if ((matcher = deletePattern.matcher(c)).matches()) {
-            // Procesar comando DELETE
+            // Comando DELETE
             String tableName = matcher.group(1);
             String condition = matcher.group(2);
-            deleteFromTable(tableName, condition);
+            Delete(tableName, condition);
         } else {
-            // Otros comandos SQL
+
             System.out.println("Comando no reconocido: " + c);
         }
     }
 
-    private static void setPath(String path) {
+    private static void Path(String path) {
         File directory = new File(path);
         if (!directory.exists()) {
             System.out.println("La ruta especificada no existe.");
@@ -90,7 +90,7 @@ public class App
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 path = reader.readLine().trim();
                 reader.close();
-                setPath(path);
+                Path(path);
             } catch (IOException e) {
                 System.out.println("Error al abrir el archivo.");
             }
@@ -125,15 +125,15 @@ public class App
     }
 
     private static void showTables() {
-        // Obtener la lista de archivos en la dirección establecida
+
         File directory = new File(Path);
         File[] files = directory.listFiles();
 
-        // Verificar si la carpeta existe y contiene archivos
+
         if (files != null && files.length > 0) {
             System.out.println("Tablas disponibles:");
 
-            // Iterar sobre los archivos y mostrar los nombres de las tablas
+
             for (File file : files) {
                 if (file.isFile()) {
                     String fileName = file.getName();
@@ -150,9 +150,9 @@ public class App
         }
     }
 
-    private static void dropTable(String tableName) {
+    private static void Drop(String tableName) {
         BufferedReader rea = new BufferedReader(new InputStreamReader(System.in));
-        // Obtener el archivo correspondiente a la tabla
+
         String filePath = Path + File.separator + tableName + ".csv";
         File tableFile = new File(filePath);
 
@@ -178,7 +178,7 @@ public class App
         }
     }
 
-    private static void selectColumnFromTable(String columnName, String tableName) {
+    private static void Select(String columnName, String tableName) {
         // Obtener la ruta del archivo CSV de la tabla especificada
         String filePath = Path + File.separator + tableName + ".csv";
         File tableFile = new File(filePath);
@@ -186,33 +186,33 @@ public class App
         // Verificar si el archivo existe y es un archivo CSV
         if (tableFile.exists() && tableFile.isFile() && filePath.endsWith(".csv")) {
             try {
-                // Crear un lector para leer el archivo CSV
+
                 BufferedReader reader = new BufferedReader(new FileReader(tableFile));
 
                 // Leer la primera línea del archivo para obtener los nombres de las columnas
                 String headerLine = reader.readLine();
                 if (headerLine != null) {
-                    // Separar los nombres de las columnas
+
                     String[] columnNames = headerLine.split(",");
 
-                    // Si la columna es "*", mostrar todas las columnas
+
                     if (columnName.equals("*")) {
                         // Mostrar el nombre de la tabla
                         System.out.println("Tabla: " + tableName);
 
-                        // Mostrar los nombres de todas las columnas
+
                         for (String col : columnNames) {
                             System.out.println("Columna: " + col.trim());
                         }
 
-                        // Leer y mostrar todos los valores de todas las columnas
+
                         String line;
                         while ((line = reader.readLine()) != null) {
                             String[] values = line.split(",");
                             for (String value : values) {
                                 System.out.print(value.trim() + "\t");
                             }
-                            System.out.println(); // Nueva línea para cada fila
+                            System.out.println();
                         }
                     } else {
                         // Encontrar el índice de la columna especificada
@@ -253,7 +253,7 @@ public class App
         }
     }
 
-    private static void insertTable(Matcher matcher) {
+    private static void Insert(Matcher matcher) {
         // Extraer el nombre de la tabla y los valores a insertar
         String tableName = matcher.group(1);
         String[] columnNames = matcher.group(2).split("\\s*,\\s*");
@@ -288,10 +288,9 @@ public class App
                 writer.write(row.toString());
                 writer.newLine();
 
-                // Cerrar el escritor
                 writer.close();
 
-                // Mostrar mensaje de éxito
+
                 System.out.println("Fila insertada en la tabla " + tableName + ".");
             } catch (IOException e) {
                 System.out.println("Error al insertar fila en la tabla " + tableName + ": " + e.getMessage());
@@ -301,7 +300,7 @@ public class App
         }
     }
 
-    private static void deleteFromTable(String tableName, String condition) {
+    private static void Delete(String tableName, String condition) {
         // Obtener la ruta del archivo CSV de la tabla especificada
         String filePath = Path + File.separator + tableName + ".csv";
         File tableFile = new File(filePath);
@@ -309,14 +308,14 @@ public class App
         // Verificar si el archivo existe y es un archivo CSV
         if (tableFile.exists() && tableFile.isFile() && filePath.endsWith(".csv")) {
             try {
-                // Crear un lector para leer el archivo CSV
+                // Crear un lector para el archivo CSV
                 BufferedReader reader = new BufferedReader(new FileReader(tableFile));
 
-                // Crear un archivo temporal para escribir las filas que no coinciden con la condición
+                // Crear un archivo temporal
                 File tempFile = new File(Path + File.separator + "temp.csv");
                 BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
-                // Leer la primera línea del archivo (encabezado)
+                // Leer el encabezado
                 String headerLine = reader.readLine();
                 writer.write(headerLine);
                 writer.newLine();
@@ -331,20 +330,18 @@ public class App
                     }
                 }
 
-                // Número de columnas en el archivo CSV
                 int numColumns = columns.length;
 
                 // Leer y procesar las filas del archivo CSV
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] values = line.split(",");
-
+                    System.out.println(" " + line);
                     // Evaluar la condición para cada fila
-                    if (!evaluateCondition(values[conditionIndices[0]], condition)) {
+                    if (!Where(values[conditionIndices[0]], condition)) {
                         // Escribir la fila original si no coincide con la condición
-                        writer.write(line);
+                        writer.write(" ");
                         writer.newLine();
-                        System.out.println("hola");
                     } else {
                         // Escribir una fila vacía con el mismo número de columnas que el encabezado
                         for (int i = 0; i < numColumns; i++) {
@@ -356,7 +353,6 @@ public class App
                     }
                 }
 
-                // Cerrar los lectores y escritores
                 reader.close();
                 writer.close();
 
@@ -389,8 +385,8 @@ public class App
 
 
 
-    private static boolean evaluateCondition(String value, String condition) {
-        // Dividir la condición en el operador y el valor
+    private static boolean Where (String value, String condition) {
+        // Dividir la condición para ver la condicion
         String[] parts = condition.split("!=");
         if (parts.length == 2) {
             String conditionValue = parts[1].trim();
@@ -407,10 +403,6 @@ public class App
         }
     }
 
-
-
-
 //USE /home/cano/Documentos/BASEDEDATOS
     //CREATE TABLE LUU(NAME VARCHAR(20) NOT NULL, APP VARCHAR(20) NOT NULL PRIMARY KEY, EDAD INT NULL);
-
 }
