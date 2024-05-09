@@ -39,6 +39,7 @@ public class App
         Pattern showTablesPattern = Pattern.compile("^SHOW\\s+TABLES$", Pattern.CASE_INSENSITIVE);
         Pattern dropTablePattern = Pattern.compile("^DROP\\s+TABLE\\s+(\\w+)$", Pattern.CASE_INSENSITIVE);
         Pattern selectPattern = Pattern.compile("^SELECT\\s+(\\*|\\w+)\\s+FROM\\s+(\\w+)$", Pattern.CASE_INSENSITIVE);
+        Pattern insertPattern = Pattern.compile("^INSERT\\s+INTO\\s+(\\w+)\\s*\\(([^)]+)\\)\\s*VALUES\\s*\\(([^)]+)\\);$", Pattern.CASE_INSENSITIVE);
 
         Matcher matcher;
 
@@ -66,12 +67,14 @@ public class App
             String columnName = matcher.group(1);
             String tableName = matcher.group(2);
             selectColumnFromTable(columnName, tableName);
-        } else {
+        } else if ((matcher = insertPattern.matcher(c)).matches()) {
+            // Procesar comando INSERT INTO
+            insertTable(matcher);
+        }else {
             // Otros comandos SQL
             System.out.println("Comando no reconocido: " + c);
         }
     }
-
 
     private static void setPath(String path) {
         File directory = new File(path);
@@ -114,8 +117,6 @@ public class App
             System.out.println("Error al ejecutar un comando");
         }
     }
-
-
 
     private static void showTables() {
         // Obtener la lista de archivos en la dirección establecida
@@ -237,15 +238,62 @@ public class App
                 } else {
                     System.out.println("El archivo de la tabla " + tableName + " está vacío.");
                 }
-
                 reader.close();
             } catch (IOException e) {
-                System.out.println("Error al leer el archivo de la tabla " + tableName + ": " + e.getMessage());
+                System.out.println("Error al leer el archivo de la tabla " + tableName + ": ");
             }
         } else {
             System.out.println("La tabla " + tableName + " no existe o no es un archivo CSV.");
         }
     }
+
+    private static void insertTable(Matcher matcher) {
+    // Extraer el nombre de la tabla y los valores a insertar
+    String tableName = matcher.group(1);
+    String[] columnNames = matcher.group(2).split("\\s*,\\s*");
+    String[] values = matcher.group(3).split("\\s*,\\s*");
+
+    // Verificar si el número de columnas coincide con el número de valores
+    if (columnNames.length != values.length) {
+        System.out.println("Error: El número de columnas y valores no coincide en el comando INSERT INTO.");
+        return;
+    }
+
+    // Construir la fila a insertar
+    StringBuilder row = new StringBuilder();
+    for (int i = 0; i < columnNames.length; i++) {
+        row.append(values[i]);
+        if (i != columnNames.length - 1) {
+            row.append(", ");
+        }
+    }
+
+    // Obtener la ruta del archivo CSV de la tabla especificada
+    String filePath = Path + File.separator + tableName + ".csv";
+    File tableFile = new File(filePath);
+
+    // Verificar si el archivo existe y es un archivo CSV
+    if (tableFile.exists() && tableFile.isFile() && filePath.endsWith(".csv")) {
+        try {
+            // Crear un escritor para agregar la nueva fila al archivo CSV
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tableFile, true));
+
+            // Escribir la nueva fila en el archivo CSV
+            writer.write(row.toString());
+            writer.newLine();
+
+            // Cerrar el escritor
+            writer.close();
+
+            // Mostrar mensaje de éxito
+            System.out.println("Fila insertada en la tabla " + tableName + ".");
+        } catch (IOException e) {
+            System.out.println("Error al insertar fila en la tabla " + tableName + ": " + e.getMessage());
+        }
+    } else {
+        System.out.println("La tabla " + tableName + " no existe o no es un archivo CSV.");
+    }
+}
 
 
 
