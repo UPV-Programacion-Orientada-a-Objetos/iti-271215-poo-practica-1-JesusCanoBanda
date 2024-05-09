@@ -1,7 +1,6 @@
 package edu.upvictoria.fpoo;
 import java.io.*;
 import java.util.regex.*;
-//import java.util.*;
 
 public class App 
 {
@@ -15,7 +14,7 @@ public class App
                 String c = reader.readLine().trim();
 
                 if (c.equalsIgnoreCase("exit")) {
-                    System.out.println("Saliendo del programa...");
+                    System.out.println("Programa terminado");
                     break;
                 }
 
@@ -116,8 +115,9 @@ public class App
 
             // Escribir encabezado en el archivo
             String headerLine = headerBuilder.toString().trim();
-            writer.write(headerLine.substring(0, headerLine.length() - 1) + "\n"); // Eliminar la última coma y agregar nueva línea
-
+            writer.write(headerLine.substring(0, headerLine.length() - 1) + "\n");
+            // Eliminar la última coma y agregar nueva línea
+            
             writer.close();
         } catch (IOException e) {
             System.out.println("Error al ejecutar un comando");
@@ -373,17 +373,6 @@ public class App
             System.out.println("La tabla " + tableName + " no existe o no es un archivo CSV.");
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 
     private static boolean Where (String value, String condition) {
         // Dividir la condición para ver la condicion
