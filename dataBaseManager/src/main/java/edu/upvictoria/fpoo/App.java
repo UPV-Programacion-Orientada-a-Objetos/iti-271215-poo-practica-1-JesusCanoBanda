@@ -4,7 +4,7 @@ import java.util.regex.*;
 
 public class App 
 {
-    private static String Path = ""; // Ruta de trabajo
+    public static String Path = ""; // Ruta de trabajo
     public static void main( String[] args )
     {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -41,49 +41,49 @@ public class App
         Pattern insertPattern = Pattern.compile("^INSERT\\s+INTO\\s+(\\w+)\\s*\\(([^)]+)\\)\\s*VALUES\\s*\\(([^)]+)\\);$", Pattern.CASE_INSENSITIVE);
         Pattern deletePattern = Pattern.compile("^DELETE\\s+FROM\\s+(\\w+)\\s+WHERE\\s+(.+)$", Pattern.CASE_INSENSITIVE);
 
-        Matcher matcher;
+        Matcher mat;
 
-        if ((matcher = usePattern.matcher(c)).matches()) {
+        if ((mat = usePattern.matcher(c)).matches()) {
             // Comando USE
-            String path = matcher.group(1);
+            String path = mat.group(1);
             Path(path);
             System.out.println("Ruta de trabajo establecida en: " + Path);
-        } else if ((matcher = createTablePattern.matcher(c)).matches()) {
+        } else if ((mat = createTablePattern.matcher(c)).matches()) {
             // Comando CREATE TABLE
-            String tableName = matcher.group(1);
-            String columns = matcher.group(2);
-            createTable(tableName, columns);
-            System.out.println("Tabla " + tableName + " creada exitosamente.");
+            String nombreTabla = mat.group(1);
+            String columnas = mat.group(2);
+            createTable(nombreTabla, columnas);
+            System.out.println("Tabla " + nombreTabla + " creada exitosamente.");
         } else if ((showTablesPattern.matcher(c)).matches()) {
             // Comando SHOW TABLES
             showTables();
-        } else if ((matcher = dropTablePattern.matcher(c)).matches()) {
+        } else if ((mat = dropTablePattern.matcher(c)).matches()) {
             // Comando DROP TABLE
-            String tableName = matcher.group(1);
-            Drop(tableName);
-            System.out.println("Tabla " + tableName + " eliminada exitosamente.");
-        } else if ((matcher = selectPattern.matcher(c)).matches()) {
+            String nombreTabla = mat.group(1);
+            Drop(nombreTabla);
+            System.out.println("Tabla " + nombreTabla + " eliminada exitosamente.");
+        } else if ((mat = selectPattern.matcher(c)).matches()) {
             // Comando SELECT
-            String columnName = matcher.group(1);
-            String tableName = matcher.group(2);
-            Select(columnName, tableName);
-        } else if ((matcher = insertPattern.matcher(c)).matches()) {
+            String nombreColumna = mat.group(1);
+            String nombreTabla = mat.group(2);
+            Select(nombreColumna, nombreTabla);
+        } else if ((mat = insertPattern.matcher(c)).matches()) {
             // Comando INSERT INTO
-            Insert(matcher);
-        } else if ((matcher = deletePattern.matcher(c)).matches()) {
+            Insert(mat);
+        } else if ((mat = deletePattern.matcher(c)).matches()) {
             // Comando DELETE
-            String tableName = matcher.group(1);
-            String condition = matcher.group(2);
-            Delete(tableName, condition);
+            String nombretabla = mat.group(1);
+            String condicion = mat.group(2);
+            Delete(nombretabla, condicion);
         } else {
 
             System.out.println("Comando no reconocido: " + c);
         }
     }
 
-    private static void Path(String path) {
-        File directory = new File(path);
-        if (!directory.exists()) {
+    public static void Path(String path) {
+        File directorio = new File(path);
+        if (!directorio.exists()) {
             System.out.println("La ruta especificada no existe.");
             try {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -98,23 +98,23 @@ public class App
         }
     }
 
-    private static void createTable(String tableName, String sql) {
+    public static void createTable(String tableName, String sql) {
         // Crear archivo CSV con las columnas especificadas
         String filePath = Path + File.separator + tableName + ".csv";
         try {
             FileWriter writer = new FileWriter(filePath);
             Pattern columnPattern = Pattern.compile("(\\w+)\\s+(\\w+)(?:\\((\\d+)\\))?\\s*(?:NOT\\s+NULL)?\\s*(?:NULL)?\\s*(?:PRIMARY\\s+KEY)?\\s*(?:,|$)", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = columnPattern.matcher(sql);
+            Matcher mat = columnPattern.matcher(sql);
 
-            StringBuilder headerBuilder = new StringBuilder();
+            StringBuilder cabecera = new StringBuilder();
 
-            while (matcher.find()) {
-                String columnName = matcher.group(1);
-                headerBuilder.append(columnName).append(",");
+            while (mat.find()) {
+                String nombreColumna = mat.group(1);
+                cabecera.append(nombreColumna).append(",");
             }
 
             // Escribir encabezado en el archivo
-            String headerLine = headerBuilder.toString().trim();
+            String headerLine = cabecera.toString().trim();
             writer.write(headerLine.substring(0, headerLine.length() - 1) + "\n");
             // Eliminar la última coma y agregar nueva línea
             
@@ -124,10 +124,10 @@ public class App
         }
     }
 
-    private static void showTables() {
+    public static void showTables() {
 
-        File directory = new File(Path);
-        File[] files = directory.listFiles();
+        File directorio = new File(Path);
+        File[] files = directorio.listFiles();
 
 
         if (files != null && files.length > 0) {
@@ -140,8 +140,8 @@ public class App
                     // Verificar si el archivo es un archivo CSV
                     if (fileName.endsWith(".csv")) {
                         // Eliminar la extensión .csv del nombre del archivo
-                        String tableName = fileName.substring(0, fileName.lastIndexOf('.'));
-                        System.out.println(tableName);
+                        String nombreTabla = fileName.substring(0, fileName.lastIndexOf('.'));
+                        System.out.println(nombreTabla);
                     }
                 }
             }
@@ -150,37 +150,37 @@ public class App
         }
     }
 
-    private static void Drop(String tableName) {
+    public static void Drop(String nombreTabla) {
         BufferedReader rea = new BufferedReader(new InputStreamReader(System.in));
 
-        String filePath = Path + File.separator + tableName + ".csv";
+        String filePath = Path + File.separator + nombreTabla + ".csv";
         File tableFile = new File(filePath);
 
         // Verificar si el archivo existe y eliminarlo si es así
         if (tableFile.exists() && tableFile.isFile()) {
             try {
-                System.out.print("¿Estas seguro de que deseas eliminar la tabla " + tableName + "? (s/n): ");
+                System.out.print("¿Estas seguro de que deseas eliminar la tabla " + nombreTabla + "? (s/n): ");
                 String r = rea.readLine().trim().toLowerCase();
                 if (r.equals("s")) {
                     if (tableFile.delete()) {
-                        System.out.println("Tabla " + tableName + " eliminada correctamente.");
+                        System.out.println("Tabla " + nombreTabla + " eliminada correctamente.");
                     } else {
-                        System.out.println("Error al eliminar la tabla " + tableName);
+                        System.out.println("Error al eliminar la tabla " + nombreTabla);
                     }
                 } else {
-                    System.out.println("La eliminación de la tabla " + tableName + " ha sido cancelada.");
+                    System.out.println("La eliminación de la tabla " + nombreTabla + " ha sido cancelada.");
                 }
             } catch (IOException e) {
                 System.out.println("Error al leer la entrada del usuario.");
             }
         } else {
-            System.out.println("La tabla " + tableName + " no existe.");
+            System.out.println("La tabla " + nombreTabla + " no existe.");
         }
     }
 
-    private static void Select(String columnName, String tableName) {
+    private static void Select(String nombreColumna, String nombreTabla) {
         // Obtener la ruta del archivo CSV de la tabla especificada
-        String filePath = Path + File.separator + tableName + ".csv";
+        String filePath = Path + File.separator + nombreTabla + ".csv";
         File tableFile = new File(filePath);
 
         // Verificar si el archivo existe y es un archivo CSV
@@ -190,15 +190,15 @@ public class App
                 BufferedReader reader = new BufferedReader(new FileReader(tableFile));
 
                 // Leer la primera línea del archivo para obtener los nombres de las columnas
-                String headerLine = reader.readLine();
-                if (headerLine != null) {
+                String lineaCabecera = reader.readLine();
+                if (lineaCabecera != null) {
 
-                    String[] columnNames = headerLine.split(",");
+                    String[] columnNames = lineaCabecera.split(",");
 
 
-                    if (columnName.equals("*")) {
+                    if (nombreColumna.equals("*")) {
                         // Mostrar el nombre de la tabla
-                        System.out.println("Tabla: " + tableName);
+                        System.out.println("Tabla: " + nombreTabla);
 
 
                         for (String col : columnNames) {
@@ -218,7 +218,7 @@ public class App
                         // Encontrar el índice de la columna especificada
                         int columnIndex = -1;
                         for (int i = 0; i < columnNames.length; i++) {
-                            if (columnNames[i].trim().equalsIgnoreCase(columnName)) {
+                            if (columnNames[i].trim().equalsIgnoreCase(nombreColumna)) {
                                 columnIndex = i;
                                 break;
                             }
@@ -238,44 +238,44 @@ public class App
                                 }
                             }
                         } else {
-                            System.out.println("La columna " + columnName + " no existe en la tabla " + tableName);
+                            System.out.println("La columna " + nombreColumna + " no existe en la tabla " + nombreTabla);
                         }
                     }
                 } else {
-                    System.out.println("El archivo de la tabla " + tableName + " está vacío.");
+                    System.out.println("El archivo de la tabla " + nombreTabla + " está vacío.");
                 }
                 reader.close();
             } catch (IOException e) {
-                System.out.println("Error al leer el archivo de la tabla " + tableName + ": ");
+                System.out.println("Error al leer el archivo de la tabla " + nombreTabla + ": ");
             }
         } else {
-            System.out.println("La tabla " + tableName + " no existe o no es un archivo CSV.");
+            System.out.println("La tabla " + nombreTabla + " no existe o no es un archivo CSV.");
         }
     }
 
-    private static void Insert(Matcher matcher) {
+    public static void Insert(Matcher matcher) {
         // Extraer el nombre de la tabla y los valores a insertar
-        String tableName = matcher.group(1);
-        String[] columnNames = matcher.group(2).split("\\s*,\\s*");
+        String nombreTabla = matcher.group(1);
+        String[] nombreColumna = matcher.group(2).split("\\s*,\\s*");
         String[] values = matcher.group(3).split("\\s*,\\s*");
 
         // Verificar si el número de columnas coincide con el número de valores
-        if (columnNames.length != values.length) {
+        if (nombreColumna.length != values.length) {
             System.out.println("Error: El número de columnas y valores no coincide en el comando INSERT INTO.");
             return;
         }
 
         // Construir la fila a insertar
         StringBuilder row = new StringBuilder();
-        for (int i = 0; i < columnNames.length; i++) {
+        for (int i = 0; i < nombreColumna.length; i++) {
             row.append(values[i]);
-            if (i != columnNames.length - 1) {
+            if (i != nombreColumna.length - 1) {
                 row.append(", ");
             }
         }
 
         // Obtener la ruta del archivo CSV de la tabla especificada
-        String filePath = Path + File.separator + tableName + ".csv";
+        String filePath = Path + File.separator + nombreTabla + ".csv";
         File tableFile = new File(filePath);
 
         // Verificar si el archivo existe y es un archivo CSV
@@ -291,18 +291,18 @@ public class App
                 writer.close();
 
 
-                System.out.println("Fila insertada en la tabla " + tableName + ".");
+                System.out.println("Fila insertada en la tabla " + nombreTabla + ".");
             } catch (IOException e) {
-                System.out.println("Error al insertar fila en la tabla " + tableName + ": " + e.getMessage());
+                System.out.println("Error al insertar fila en la tabla " + nombreTabla + ": " + e.getMessage());
             }
         } else {
-            System.out.println("La tabla " + tableName + " no existe o no es un archivo CSV.");
+            System.out.println("La tabla " + nombreTabla + " no existe o no es un archivo CSV.");
         }
     }
 
-    private static void Delete(String tableName, String condition) {
+    private static void Delete(String nombreTabla, String condicion) {
         // Obtener la ruta del archivo CSV de la tabla especificada
-        String filePath = Path + File.separator + tableName + ".csv";
+        String filePath = Path + File.separator + nombreTabla + ".csv";
         File tableFile = new File(filePath);
 
         // Verificar si el archivo existe y es un archivo CSV
@@ -316,15 +316,15 @@ public class App
                 BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
                 // Leer el encabezado
-                String headerLine = reader.readLine();
-                writer.write(headerLine);
+                String lineaCabecera = reader.readLine();
+                writer.write(lineaCabecera);
                 writer.newLine();
 
                 // Obtener los índices de las columnas mencionadas en la condición
-                String[] columns = headerLine.split(",");
+                String[] columns = lineaCabecera.split(",");
                 int[] conditionIndices = new int[2];
                 for (int i = 0; i < columns.length; i++) {
-                    if (condition.contains(columns[i].trim())) {
+                    if (condicion.contains(columns[i].trim())) {
                         conditionIndices[0] = i;
                         break;
                     }
@@ -338,7 +338,7 @@ public class App
                     String[] values = line.split(",");
                     System.out.println(" " + line);
                     // Evaluar la condición para cada fila
-                    if (!Where(values[conditionIndices[0]], condition)) {
+                    if (!Where(values[conditionIndices[0]], condicion)) {
                         // Escribir la fila original si no coincide con la condición
                         writer.write(" ");
                         writer.newLine();
@@ -359,31 +359,31 @@ public class App
                 // Reemplazar el archivo original con el archivo temporal
                 if (tableFile.delete()) {
                     if (tempFile.renameTo(tableFile)) {
-                        System.out.println("Filas modificadas en la tabla " + tableName + " según la condición.");
+                        System.out.println("Filas modificadas en la tabla " + nombreTabla + " según la condición.");
                     } else {
                         System.out.println("Error al renombrar la tabla.");
                     }
                 } else {
-                    System.out.println("Error al eliminar la tabla " + tableName);
+                    System.out.println("Error al eliminar la tabla " + nombreTabla);
                 }
             } catch (IOException e) {
-                System.out.println("Error al modificar filas de la tabla " + tableName + ": " + e.getMessage());
+                System.out.println("Error al modificar filas de la tabla " + nombreTabla + ": " + e.getMessage());
             }
         } else {
-            System.out.println("La tabla " + tableName + " no existe o no es un archivo CSV.");
+            System.out.println("La tabla " + nombreTabla + " no existe o no es un archivo CSV.");
         }
     }
 
-    private static boolean Where (String value, String condition) {
+    private static boolean Where (String value, String condicion) {
         // Dividir la condición para ver la condicion
-        String[] parts = condition.split("!=");
-        if (parts.length == 2) {
-            String conditionValue = parts[1].trim();
+        String[] partes = condicion.split("!=");
+        if (partes.length == 2) {
+            String conditionValue = partes[1].trim();
             return !value.equals(conditionValue);
         } else {
-            parts = condition.split("=");
-            if (parts.length == 2) {
-                String conditionValue = parts[1].trim();
+            partes = condicion.split("=");
+            if (partes.length == 2) {
+                String conditionValue = partes[1].trim();
                 return value.equals(conditionValue);
             } else {
                 System.out.println("Error: Condición no válida.");
@@ -391,7 +391,5 @@ public class App
             }
         }
     }
-
 //USE /home/cano/Documentos/BASEDEDATOS
-    //CREATE TABLE LUU(NAME VARCHAR(20) NOT NULL, APP VARCHAR(20) NOT NULL PRIMARY KEY, EDAD INT NULL);
 }
